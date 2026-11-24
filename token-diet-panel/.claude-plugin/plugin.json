@@ -1,0 +1,1 @@
+{ "name": "token-diet-panel", "version": "0.1.0", "description": "Off, Lite or Full for the token-diet skill above every prompt, with a panel to switch and tune each tool", "types": "./types/index.d.ts" }
