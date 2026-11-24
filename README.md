@@ -24,19 +24,30 @@ A settings panel (Off / Lite / Full) lives above the Claude Code message box so 
 
 ## Savings
 
-**Over 90% fewer tokens across five real jobs.** Four of the five saved more than 90% on their own; command output saved 54%.
+**Over 90% fewer tokens across five real jobs.** Four of the five saved more than 90% on their own; command output saved about half.
 
-| Job | Raw | Through the tool | Saved |
-|---|---|---|---|
-| Wikipedia page on Costco (trafilatura) | 1,264,671 bytes | 112,566 | 91% |
-| GitHub API reply, three fields wanted (jq) | 5,961 | 50 | 99% |
-| Search 6 source files for one word (ripgrep) | 47,120 | 1,487 | 97% |
-| 86,383-row airports CSV, "which countries have the most large airports" (DuckDB) | 12,763,057 | 420 | 99.99% |
-| `git log -30` (RTK) | 7,079 | 3,244 | 54% |
+| Job | Tool | Raw bytes | Through the tool | Saved |
+|---|---|---|---|---|
+| Wikipedia page on Costco | trafilatura | 1,266,550 | 112,853 | 91% |
+| GitHub API reply, three fields wanted | jq | 5,420 | 51 | 99.05% |
+| Search ripgrep 14.1.1 source for "fn search" | ripgrep | 165,195 | 3,855 | 97% |
+| 86k-row airports CSV, "which countries have the most large airports" | DuckDB | 12,763,634 | 44 | 99.99% |
+| `git log -30` of the ripgrep repository | RTK | 10,409 | 4,910 | 52% |
 
-Docling: the skill's flags make a 9-page PDF's Markdown 95% smaller than Docling's defaults (583,815 → 29,046 bytes) because the defaults embed every image as text.
+Run it yourself (needs the five tools; inputs are public and fixed where they can be):
 
-Single runs on one Mac. Tokens estimated as bytes ÷ 4. The overall figure is dominated by the spreadsheet — your saving depends on what you feed the agent. If you rarely hand it web pages, data files or PDFs, expect much less.
+```bash
+python3 bench/benchmark.py            # sizes in bytes
+python3 bench/benchmark.py --tokens   # real Claude token counts: pip install anthropic, plus an Anthropic credential
+```
+
+How to read it:
+
+- **"Raw" is the worst case:** the input as a naive read takes it. Agents often do better by default: Claude Code's web fetch summarizes pages with a small model, and its file reader stops at a size limit. The saving against what your agent actually does will usually be smaller than this table.
+- **The total is mostly the spreadsheet.** If you rarely hand the agent web pages, data files or PDFs, expect much less.
+- **Single runs on one Mac.** Live inputs (the Wikipedia page, the airports file) change a little from day to day, so your numbers will differ slightly. Percentages are rounded down.
+
+Docling is not in the table because its comparison is different: the skill's flags make a 9-page PDF's Markdown 95% smaller than Docling's own defaults (583,815 → 29,046 bytes), because the defaults embed every image as text.
 
 ## What the skill itself costs
 
