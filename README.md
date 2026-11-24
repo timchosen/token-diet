@@ -1,5 +1,7 @@
 # token-diet
 
+**99.2% fewer tokens across five real jobs: about 3.5 million down to about 29,400.**
+
 Coding agents burn tokens reading things they don't need: full web pages when they only want the article, entire CSVs for one aggregate, whole API replies for three fields, noisy command output, and PDFs full of base64 images.
 
 token-diet is a skill that stops that. Before the agent reads a big input, it runs the input through a free local tool and only reads the small result. In single-run tests on one Mac this cut roughly 3.5 million tokens down to about 29,400 — **99.2% fewer tokens** across five real jobs. It is written for Claude Code and as a standard `SKILL.md` folder for Grok and any other agent that can follow one (tested in Claude Code).
