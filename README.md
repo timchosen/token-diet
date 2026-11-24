@@ -24,15 +24,31 @@ A settings panel (Off / Lite / Full) lives above the Claude Code message box so 
 
 ## Savings
 
-**Over 90% fewer tokens across five real jobs.** Four of the five saved more than 90% on their own; command output saved about half.
+**Over 90% fewer tokens across five real jobs.** Four of the five saved more than 90% on their own; command output saved about half. Token counts are Claude's own (`claude-opus-5-5`, via the token-counting API).
 
-| Job | Tool | Raw bytes | Through the tool | Saved |
+| Job | Tool | Raw tokens | Through the tool | Saved |
 |---|---|---|---|---|
-| Wikipedia page on Costco | trafilatura | 1,266,550 | 112,853 | 91% |
-| GitHub API reply, three fields wanted | jq | 5,420 | 51 | 99.05% |
-| Search ripgrep 14.1.1 source for "fn search" | ripgrep | 165,195 | 3,855 | 97% |
-| 86k-row airports CSV, "which countries have the most large airports" | DuckDB | 12,763,634 | 44 | 99.99% |
-| `git log -30` of the ripgrep repository | RTK | 10,409 | 4,910 | 52% |
+| Wikipedia page on Costco | trafilatura | 636,659 | 46,934 | 92% |
+| GitHub API reply, three fields wanted | jq | 2,507 | 34 | 98% |
+| Search ripgrep 14.1.1 source for "fn search" | ripgrep | 60,479 | 2,300 | 96% |
+| 86k-row airports CSV, "which countries have the most large airports" | DuckDB | ~3,190,908* | 38 | 99.99% |
+| `git log -30` of the ripgrep repository | RTK | 4,818 | 2,138 | 55% |
+| **All five** | | **~3,895,371** | **51,444** | **98%** |
+| **All but the spreadsheet** | | **704,463** | **51,406** | **92%** |
+
+\* Too large to send for counting, so estimated as bytes / 4. The counted inputs ran at about 2 bytes per token, so the real figure is likely higher.
+
+The same run in bytes, for comparison:
+
+| Job | Raw bytes | Through the tool | Saved |
+|---|---|---|---|
+| Wikipedia page on Costco | 1,266,550 | 112,853 | 91% |
+| GitHub API reply | 5,420 | 51 | 99.05% |
+| ripgrep search | 165,195 | 3,855 | 97% |
+| Airports CSV | 12,763,634 | 44 | 99.99% |
+| `git log -30` | 10,409 | 4,910 | 52% |
+
+The common "4 bytes per token" rule undercounts here: HTML, JSON and code came out at 2 to 2.7 bytes per token, so the raw inputs cost more tokens than a byte count suggests.
 
 Run it yourself (needs the five tools; inputs are public and fixed where they can be):
 
@@ -44,7 +60,7 @@ python3 bench/benchmark.py --tokens   # real Claude token counts: pip install an
 How to read it:
 
 - **"Raw" is the worst case:** the input as a naive read takes it. Agents often do better by default: Claude Code's web fetch summarizes pages with a small model, and its file reader stops at a size limit. The saving against what your agent actually does will usually be smaller than this table.
-- **The total is mostly the spreadsheet.** If you rarely hand the agent web pages, data files or PDFs, expect much less.
+- **The spreadsheet dominates the five-job total.** Without it the other four still save 92%, but if you rarely hand the agent web pages, data files or PDFs, expect much less.
 - **Single runs on one Mac.** Live inputs (the Wikipedia page, the airports file) change a little from day to day, so your numbers will differ slightly. Percentages are rounded down.
 
 Docling is not in the table because its comparison is different: the skill's flags make a 9-page PDF's Markdown 95% smaller than Docling's own defaults (583,815 → 29,046 bytes), because the defaults embed every image as text.

@@ -137,6 +137,7 @@ def main():
 
     count = counter() if "--tokens" in sys.argv else None
     rows, total_raw, total_out, skipped = [], 0, 0, []
+    tok_raw, tok_out = 0, 0
     with tempfile.TemporaryDirectory(prefix="token-diet-bench-") as d:
         for name, tool, fn in JOBS:
             if shutil.which(tool) is None:
@@ -150,18 +151,28 @@ def main():
                 continue
             total_raw += len(raw)
             total_out += len(out)
-            cells = [name, tool, f"{len(raw):,}", f"{len(out):,}", saved(len(raw), len(out))]
+            cells = [name, tool, f"{len(raw):,}", f"{len(out):,}"]
             if count:
-                cells[2:4] = [tokens(len(raw), count(raw)), tokens(len(out), count(out))]
+                cr, co = count(raw), count(out)
+                r, o = (cr if cr is not None else len(raw) // 4), (co if co is not None else len(out) // 4)
+                tok_raw, tok_out = tok_raw + r, tok_out + o
+                cells += [tokens(len(raw), cr), tokens(len(out), co), saved(r, o)]
+            else:
+                cells.append(saved(len(raw), len(out)))
             rows.append(cells)
 
-    unit = f"tokens ({MODEL}; ~ = estimated as bytes / 4)" if count else "bytes"
-    print(f"\n| Job | Tool | Raw {unit} | Through the tool | Saved |\n|---|---|---|---|---|")
+    if count:
+        print(f"\n| Job | Tool | Raw bytes | Through the tool | Raw tokens | Through the tool | Saved (tokens) |"
+              "\n|---|---|---|---|---|---|---|")
+    else:
+        print("\n| Job | Tool | Raw bytes | Through the tool | Saved |\n|---|---|---|---|---|")
     for cells in rows:
         print("| " + " | ".join(cells) + " |")
     if rows:
         print(f"\nAll {len(rows)} jobs together: {total_raw:,} bytes to {total_out:,} bytes, "
               f"{saved(total_raw, total_out)} saved (about {total_raw // 4:,} to {total_out // 4:,} tokens at bytes / 4).")
+    if count and rows:
+        print(f"In {MODEL} tokens (~ = estimated as bytes / 4): {tok_raw:,} to {tok_out:,}, {saved(tok_raw, tok_out)} saved.")
     for s in skipped:
         print(f"Skipped: {s}")
 
